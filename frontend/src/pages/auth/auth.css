@@ -55,7 +55,20 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 2.5rem 5rem 2.5rem;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.auth-hero-content {
+  width: 100%;
+  max-width: 1050px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
 }
 
 /* ── Scroll Down Indicator Bar ─────────────────────────────── */
