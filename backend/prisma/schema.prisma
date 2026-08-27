@@ -1,0 +1,498 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ======================================================
+// NOVAX ERP — Multi-Industry Schema
+// Supports: TEXTILE | POULTRY_FARM
+// ======================================================
+
+// ── Shared Core ───────────────────────────────────────
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  industry  String   @default("TEXTILE") // "TEXTILE" | "POULTRY_FARM"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+
+  // Farm relations
+  farms             Farm[]
+  feedStocks        FeedStock[]
+  farmSuppliers     FarmSupplier[]
+  farmCustomers     FarmCustomer[]
+  farmPurchaseOrders FarmPurchaseOrder[]
+  farmSalesOrders   FarmSalesOrder[]
+  farmExpenses      FarmExpense[]
+  farmEquipment     FarmEquipment[]
+}
+
+model Role {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+}
+
+model User {
+  id               String       @id @default(uuid())
+  email            String       @unique
+  passwordHash     String
+  firstName        String?
+  lastName         String?
+  employeeId       String?
+  joiningDate      String?
+  department       String?
+  shift            String?
+
+  resetToken       String?
+  resetTokenExpiry DateTime?
+
+  organizationId   String
+  organization     Organization @relation(fields: [organizationId], references: [id])
+
+  roleId           String
+  role             Role         @relation(fields: [roleId], references: [id])
+
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  // Textile relations
+  attendances      Attendance[]
+  workOrders       WorkOrder[]
+  inspections      QualityInspection[]
+
+  // Farm relations
+  mortalityRecords    MortalityRecord[]
+  feedConsumptions    FeedConsumption[]
+  eggProductions      EggProduction[]
+  farmVaccinations    FarmVaccination[]
+}
+
+// ── Textile: Attendance (shared) ──────────────────────
+
+model Attendance {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  date      String
+  checkIn   String?
+  checkOut  String?
+  hours     Float?   @default(8.0)
+  overtime  Float?   @default(0.0)
+  status    String
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ── Textile: Customers / Suppliers ───────────────────
+
+model Customer {
+  id          String       @id @default(uuid())
+  name        String
+  email       String?
+  phone       String?
+  address     String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  workOrders  WorkOrder[]
+  salesOrders SalesOrder[]
+}
+
+model Supplier {
+  id             String          @id @default(uuid())
+  name           String
+  email          String?
+  phone          String?
+  address        String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  purchaseOrders PurchaseOrder[]
+}
+
+model Material {
+  id             String          @id @default(uuid())
+  materialId     String          @unique
+  name           String
+  category       String
+  currentStock   Float
+  unit           String
+  minStock       Float
+  warehouse      String
+  status         String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  purchaseOrders PurchaseOrder[]
+}
+
+model Machine {
+  id                 String      @id @default(uuid())
+  machineId          String      @unique
+  name               String
+  type               String
+  status             String
+  runtime            Int         @default(0)
+  lastMaintenance    DateTime?
+  nextMaintenance    DateTime?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  workOrders         WorkOrder[]
+}
+
+model WorkOrder {
+  id                 String      @id @default(uuid())
+  workOrderId        String      @unique
+  customerId         String
+  customer           Customer    @relation(fields: [customerId], references: [id])
+  product            String
+  quantity           Int
+  unit               String      @default("m")
+  priority           String      @default("Normal")
+  machineId          String?
+  machine            Machine?    @relation(fields: [machineId], references: [id])
+  operatorId         String?
+  operator           User?       @relation(fields: [operatorId], references: [id])
+  startDate          String?
+  expectedCompletion String?
+  status             String
+  notes              String?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  inspections        QualityInspection[]
+}
+
+model PurchaseOrder {
+  id                 String      @id @default(uuid())
+  poId               String      @unique
+  supplierId         String
+  supplier           Supplier    @relation(fields: [supplierId], references: [id])
+  materialId         String
+  material           Material    @relation(fields: [materialId], references: [id])
+  quantity           Float
+  unit               String
+  expectedDelivery   String?
+  status             String
+  notes              String?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+}
+
+model SalesOrder {
+  id                 String      @id @default(uuid())
+  soId               String      @unique
+  customerId         String
+  customer           Customer    @relation(fields: [customerId], references: [id])
+  product            String
+  quantity           Int
+  total              Float
+  orderDate          String
+  deliveryDate       String?
+  status             String
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  shipments          Shipment[]
+}
+
+model QualityInspection {
+  id                 String      @id @default(uuid())
+  inspectionId       String      @unique
+  workOrderId        String
+  workOrder          WorkOrder   @relation(fields: [workOrderId], references: [id])
+  product            String
+  inspectorId        String
+  inspector          User        @relation(fields: [inspectorId], references: [id])
+  quantityInspected  Int
+  passedQuantity     Int
+  defectQuantity     Int
+  defectType         String?
+  result             String
+  date               String
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+}
+
+model Shipment {
+  id                 String      @id @default(uuid())
+  shipmentId         String      @unique
+  salesOrderId       String
+  salesOrder         SalesOrder  @relation(fields: [salesOrderId], references: [id])
+  transport          String
+  dispatchDate       String?
+  expectedDelivery   String?
+  status             String
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+}
+
+// ======================================================
+// FARM / POULTRY MODELS
+// All farm records are scoped to organizationId
+// ======================================================
+
+model Farm {
+  id             String   @id @default(uuid())
+  farmId         String   @unique  // e.g. FARM-001
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  location       String?
+  managerName    String?
+  contactPhone   String?
+  totalCapacity  Int      @default(0)
+  status         String   @default("Active") // Active | Inactive
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  sheds          Shed[]
+}
+
+model Shed {
+  id             String   @id @default(uuid())
+  shedId         String   @unique  // e.g. SH-001
+  farmId         String
+  farm           Farm     @relation(fields: [farmId], references: [id])
+  name           String
+  capacity       Int
+  currentBirds   Int      @default(0)
+  status         String   @default("Active") // Active | Empty | Maintenance | Closed
+  shedType       String   @default("Broiler") // Broiler | Layer
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  batches        Batch[]
+  feedConsumptions FeedConsumption[]
+  eggProductions   EggProduction[]
+}
+
+model Batch {
+  id               String   @id @default(uuid())
+  batchId          String   @unique  // e.g. BR-2026-001
+  shedId           String
+  shed             Shed     @relation(fields: [shedId], references: [id])
+  birdType         String   // Broiler | Layer | Breeder
+  breed            String?  // e.g. Cobb 500, Ross 308
+  initialQuantity  Int
+  currentQuantity  Int
+  totalMortality   Int      @default(0)
+  arrivalDate      String
+  ageInDays        Int      @default(0)
+  expectedMaturity String?  // date
+  sourceSupplier   String?
+  status           String   @default("Active") // Active | Sold | Closed
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  mortalityRecords   MortalityRecord[]
+  feedConsumptions   FeedConsumption[]
+  eggProductions     EggProduction[]
+  vaccinations       FarmVaccination[]
+  salesOrders        FarmSalesOrder[]
+}
+
+model MortalityRecord {
+  id           String   @id @default(uuid())
+  batchId      String
+  batch        Batch    @relation(fields: [batchId], references: [id])
+  recordedById String
+  recordedBy   User     @relation(fields: [recordedById], references: [id])
+  date         String   // YYYY-MM-DD
+  quantity     Int
+  reason       String?  // Disease | Injury | Unknown | Natural
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model FeedStock {
+  id             String   @id @default(uuid())
+  stockId        String   @unique  // e.g. FS-001
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  feedType       String   // Starter | Grower | Finisher | Layer
+  brand          String?
+  currentStock   Float    // in kg
+  unit           String   @default("kg")
+  reorderLevel   Float    @default(500)
+  costPerKg      Float    @default(0)
+  supplier       String?
+  warehouseLocation String?
+  status         String   @default("Healthy") // Healthy | Low | Critical
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model FeedConsumption {
+  id           String   @id @default(uuid())
+  batchId      String
+  batch        Batch    @relation(fields: [batchId], references: [id])
+  shedId       String
+  shed         Shed     @relation(fields: [shedId], references: [id])
+  recordedById String
+  recordedBy   User     @relation(fields: [recordedById], references: [id])
+  date         String
+  feedType     String
+  quantityKg   Float
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model EggProduction {
+  id           String   @id @default(uuid())
+  batchId      String
+  batch        Batch    @relation(fields: [batchId], references: [id])
+  shedId       String
+  shed         Shed     @relation(fields: [shedId], references: [id])
+  recordedById String
+  recordedBy   User     @relation(fields: [recordedById], references: [id])
+  date         String
+  goodEggs     Int      @default(0)
+  damagedEggs  Int      @default(0)
+  totalEggs    Int      @default(0)
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model FarmVaccination {
+  id           String   @id @default(uuid())
+  batchId      String
+  batch        Batch    @relation(fields: [batchId], references: [id])
+  recordedById String
+  recordedBy   User     @relation(fields: [recordedById], references: [id])
+  vaccineName  String
+  date         String
+  nextDueDate  String?
+  birdAge      Int?     // age in days at vaccination
+  veterinarian String?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model FarmSupplier {
+  id             String   @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  category       String   // Feed | Medicine | Equipment | Chicks | Other
+  contactPerson  String?
+  phone          String?
+  email          String?
+  address        String?
+  gstNumber      String?
+  status         String   @default("Active")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  purchaseOrders FarmPurchaseOrder[]
+}
+
+model FarmPurchaseOrder {
+  id             String       @id @default(uuid())
+  poId           String       @unique  // e.g. FPO-001
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  supplierId     String
+  supplier       FarmSupplier @relation(fields: [supplierId], references: [id])
+  itemName       String
+  category       String       // Feed | Medicine | Vaccine | Equipment | Chicks | Other
+  quantity       Float
+  unit           String
+  unitPrice      Float        @default(0)
+  totalAmount    Float        @default(0)
+  orderDate      String
+  expectedDelivery String?
+  deliveryStatus String       @default("Pending") // Pending | Partial | Delivered
+  paymentStatus  String       @default("Unpaid")  // Unpaid | Partial | Paid
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model FarmCustomer {
+  id             String   @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  contactPerson  String?
+  phone          String?
+  email          String?
+  address        String?
+  customerType   String   @default("Wholesaler") // Wholesaler | Retailer | Hotel | Individual
+  status         String   @default("Active")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  salesOrders    FarmSalesOrder[]
+}
+
+model FarmSalesOrder {
+  id             String       @id @default(uuid())
+  soId           String       @unique  // e.g. FSO-001
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  customerId     String
+  customer       FarmCustomer @relation(fields: [customerId], references: [id])
+  batchId        String?
+  batch          Batch?       @relation(fields: [batchId], references: [id])
+  productType    String       // Live Birds | Eggs | Dressed Chicken | Other
+  quantity       Float
+  unit           String       @default("kg")
+  unitPrice      Float
+  totalAmount    Float
+  orderDate      String
+  deliveryDate   String?
+  orderStatus    String       @default("Confirmed") // Confirmed | Ready | Delivered | Cancelled
+  paymentStatus  String       @default("Unpaid")
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model FarmExpense {
+  id             String   @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  date           String
+  category       String   // Feed | Medicine | Labour | Electricity | Transport | Maintenance | Other
+  description    String
+  amount         Float
+  paymentMode    String?  // Cash | Bank | UPI
+  referenceNo    String?
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model FarmEquipment {
+  id              String   @id @default(uuid())
+  assetId         String   @unique  // e.g. EQ-001
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  name            String
+  category        String   // Feeder | Waterer | Generator | Fan | Motor | Egg Equipment | Other
+  farmLocation    String?
+  purchaseDate    String?
+  purchaseCost    Float    @default(0)
+  warrantyExpiry  String?
+  lastService     String?
+  nextService     String?
+  status          String   @default("Operational") // Operational | Under Maintenance | Faulty | Retired
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
