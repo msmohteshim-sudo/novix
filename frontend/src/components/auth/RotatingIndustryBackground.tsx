@@ -50,6 +50,21 @@ const SCENES: Scene[] = [
     id: 'steel-mill',
     url: '/images/steel-mill.jpg',
     alt: 'Heavy steel manufacturing mill and hot rolling bar line'
+  },
+  {
+    id: 'footwear-factory',
+    url: '/images/footwear-factory.jpg',
+    alt: 'Footwear and shoe manufacturing conveyor assembly line'
+  },
+  {
+    id: 'poultry-farm',
+    url: '/images/poultry-farm.jpg',
+    alt: 'Modern commercial poultry farm layer area and egg collection'
+  },
+  {
+    id: 'textile-spinning',
+    url: '/images/textile-spinning.jpg',
+    alt: 'Textile yarn bobbin spinning and weaving mill'
   }
 ];
 
