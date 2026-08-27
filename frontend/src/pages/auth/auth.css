@@ -120,27 +120,155 @@ body {
   }
 }
 
-/* ── Section 2: Downside Dedicated Login Page ────────────── */
+/* ── Section 2: Downside App Info & Dedicated Login Page ─────── */
 .auth-downside-section {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 3rem 1.5rem;
+  padding: 4rem 2rem;
   box-sizing: border-box;
+  background: #090d16;
+  background-image: 
+    radial-gradient(circle at 15% 20%, rgba(37, 99, 235, 0.16) 0%, transparent 45%),
+    radial-gradient(circle at 85% 75%, rgba(124, 58, 237, 0.14) 0%, transparent 45%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  z-index: 5;
 }
 
-.auth-downside-content {
+.auth-downside-grid-container {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 3.5rem;
+  max-width: 1180px;
+  width: 100%;
+  margin: 0 auto;
+  align-items: center;
+}
+
+/* App Info Panel Styling */
+.auth-app-info-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.info-panel-title {
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.22;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.info-panel-desc {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.info-section-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #cbd5e1;
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-transform: uppercase;
+}
+
+/* Supported Industries Grid */
+.supported-industries-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+}
+
+.industry-info-badge {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0.55rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.industry-info-badge:hover {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.ind-icon {
+  font-size: 1.1rem;
+}
+
+.ind-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+/* Platform Highlights List */
+.platform-highlights-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.highlight-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+.highlight-check-icon {
+  color: #38bdf8;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Info Metrics Row */
+.info-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.metric-box {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.metric-value {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #38bdf8;
+  margin-bottom: 2px;
+}
+
+.metric-label {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.auth-downside-card-column {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
-  max-width: 480px;
-  margin: 0 auto;
-}
-
-.auth-downside-card-wrapper {
-  width: 100%;
 }
 
 /* ── Background slideshow (full-screen, behind everything) ── */
