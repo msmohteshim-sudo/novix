@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Scene {
   id: string;
@@ -6,25 +7,6 @@ interface Scene {
   alt: string;
 }
 
-/**
- * 15 India-first industry scenes.
- * Priority order as specified:
- *  1. Textile / Fabric spinning & weaving
- *  2. Textile garment factory floor
- *  3. Poultry / Chicken farming sheds
- *  4. Indian agriculture — wheat/crop fields
- *  5. Indian agriculture — tractor & harvest
- *  6. Food processing & packaging plant
- *  7. Indian manufacturing factory floor
- *  8. Industrial automation & CNC machinery
- *  9. Indian warehousing & inventory
- * 10. Indian logistics & truck transport
- * 11. Pharmaceutical / medicine manufacturing
- * 12. Electronics & electrical component assembly
- * 13. Construction & engineering site
- * 14. Metal fabrication & welding
- * 15. Packaging & distribution operations
- */
 const SCENES: Scene[] = [
   {
     id: 'sugarcane-mill',
@@ -80,34 +62,40 @@ function shuffle<T>(arr: T[]): T[] {
 
 interface Props {
   intervalMs?: number;
+  showControls?: boolean;
 }
 
-export const RotatingIndustryBackground: React.FC<Props> = ({ intervalMs = 5000 }) => {
+export const RotatingIndustryBackground: React.FC<Props> = ({ intervalMs = 5000, showControls = true }) => {
   const scenes = useMemo(() => shuffle(SCENES), []);
   const [current, setCurrent] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const prefersReduced =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Silently preload the next 2 slides in the background
-  useEffect(() => {
-    [(current + 1) % scenes.length, (current + 2) % scenes.length].forEach((idx) => {
-      const img = new window.Image();
-      img.src = scenes[idx].url;
-    });
-  }, [current, scenes]);
+  const resetTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % scenes.length);
+    }, intervalMs);
+  };
+
+  const nextSlide = () => {
+    setCurrent((prev) => (prev + 1) % scenes.length);
+    resetTimer();
+  };
+
+  const prevSlide = () => {
+    setCurrent((prev) => (prev - 1 + scenes.length) % scenes.length);
+    resetTimer();
+  };
 
   // Auto-advance
   useEffect(() => {
-    if (prefersReduced) return;
     timerRef.current = setInterval(() => {
       setCurrent((prev) => (prev + 1) % scenes.length);
     }, intervalMs);
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [intervalMs, scenes.length, prefersReduced]);
+  }, [intervalMs, scenes.length]);
 
   return (
     <div className="bg-slideshow">
@@ -121,6 +109,17 @@ export const RotatingIndustryBackground: React.FC<Props> = ({ intervalMs = 5000 
           aria-hidden={idx !== current}
         />
       ))}
+
+      {showControls && (
+        <>
+          <button className="bg-slide-control bg-slide-control-prev" onClick={prevSlide} aria-label="Previous Background Image">
+            <ChevronLeft size={22} />
+          </button>
+          <button className="bg-slide-control bg-slide-control-next" onClick={nextSlide} aria-label="Next Background Image">
+            <ChevronRight size={22} />
+          </button>
+        </>
+      )}
     </div>
   );
 };
