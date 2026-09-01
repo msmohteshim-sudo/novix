@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Search, Bell, Sparkles, Building, ChevronDown, LogOut, X } from 'lucide-react';
+import { Search, Bell, Sparkles, Building, ChevronDown, LogOut, X, Palette } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import './layout.css';
 
 export const Header: React.FC = () => {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -123,9 +125,33 @@ export const Header: React.FC = () => {
       </div>
 
       <div className="erp-header-right">
+        {/* Theme Switcher Toggle Button */}
+        <button 
+          className="erp-icon-btn theme-toggle-btn" 
+          title={`Switch theme (Current: ${theme === 'pink' ? 'Pink / Rose' : 'Dark Navy / Blue'})`} 
+          onClick={toggleTheme}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '4px 10px',
+            borderRadius: '20px',
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            border: theme === 'pink' ? '1px solid #fbcfe8' : '1px solid #1e293b',
+            background: theme === 'pink' ? '#fdf2f8' : '#0f172a',
+            color: theme === 'pink' ? '#db2777' : '#38bdf8',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <Palette size={16} />
+          <span>{theme === 'pink' ? 'Pink Form' : 'Dark Blue Form'}</span>
+        </button>
+
         {/* AI Assistant Shortcut */}
         <button className="erp-icon-btn" title="AI Assistant" onClick={() => navigate('/ai-insights')}>
-          <Sparkles size={20} color="#0ea5e9" />
+          <Sparkles size={20} color={theme === 'pink' ? '#ec4899' : '#0ea5e9'} />
         </button>
 
         {/* Notifications */}

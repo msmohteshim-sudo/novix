@@ -163,6 +163,7 @@ export const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedIndustry, setSelectedIndustry] = useState<'TEXTILE' | 'POULTRY_FARM'>('TEXTILE');
+  void setSelectedIndustry;
   const [selectedRole, setSelectedRole] = useState<string>('Admin');
 
   const activeIdentities = selectedIndustry === 'POULTRY_FARM' ? farmRoleIdentities : roleIdentities;
@@ -252,55 +253,9 @@ export const Login: React.FC = () => {
       
       {error && <div className="auth-error">{error}</div>}
 
-      {/* INDUSTRY & ROLE SWITCHER */}
+      {/* ROLE SWITCHER */}
       <div className="role-switcher-card">
-        <label className="role-switcher-title">Select Industry & Role</label>
-        
-        {/* Industry selector tabs */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.85rem' }}>
-          <button
-            type="button"
-            style={{
-              flex: 1,
-              padding: '0.5rem 0.75rem',
-              borderRadius: '8px',
-              border: '1px solid ' + (selectedIndustry === 'TEXTILE' ? '#6366f1' : 'rgba(255,255,255,0.1)'),
-              background: selectedIndustry === 'TEXTILE' ? 'rgba(99,102,241,0.18)' : 'rgba(255,255,255,0.04)',
-              color: selectedIndustry === 'TEXTILE' ? '#818cf8' : '#94a3b8',
-              fontWeight: 600,
-              fontSize: '0.8rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.35rem'
-            }}
-            onClick={() => setSelectedIndustry('TEXTILE')}
-          >
-            🏭 Textile Manufacturing
-          </button>
-          <button
-            type="button"
-            style={{
-              flex: 1,
-              padding: '0.5rem 0.75rem',
-              borderRadius: '8px',
-              border: '1px solid ' + (selectedIndustry === 'POULTRY_FARM' ? '#10b981' : 'rgba(255,255,255,0.1)'),
-              background: selectedIndustry === 'POULTRY_FARM' ? 'rgba(16,185,129,0.18)' : 'rgba(255,255,255,0.04)',
-              color: selectedIndustry === 'POULTRY_FARM' ? '#34d399' : '#94a3b8',
-              fontWeight: 600,
-              fontSize: '0.8rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.35rem'
-            }}
-            onClick={() => setSelectedIndustry('POULTRY_FARM')}
-          >
-            🐔 Poultry / Farm ERP
-          </button>
-        </div>
+        <label className="role-switcher-title">Select Demo Role Identity</label>
 
         <div className="role-pills-grid">
           {activeIdentities.map((item) => {
@@ -321,7 +276,7 @@ export const Login: React.FC = () => {
           })}
         </div>
         <div className="role-switcher-hint">
-          💡 Click any role identity above to sign in instantly as <strong>{selectedIndustry === 'POULTRY_FARM' ? 'Poultry Farm Operations' : 'Textile Manufacturing'}</strong>.
+          💡 Click any role identity above to sign in instantly.
         </div>
       </div>
 

@@ -52,15 +52,49 @@
 }
 
 .erp-btn-primary {
-  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  background: linear-gradient(135deg, #0088ff, #0284c7);
   color: white;
-  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 136, 255, 0.25);
 }
 
 .erp-btn-primary:hover {
-  background: linear-gradient(135deg, #0284c7, #0369a1);
-  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+  background: linear-gradient(135deg, #0066cc, #0284c7);
+  box-shadow: 0 4px 12px rgba(0, 136, 255, 0.35);
   transform: translateY(-1px);
+}
+
+/* Theme Pink Buttons & Badges */
+.theme-pink .erp-btn-primary {
+  background: linear-gradient(135deg, #ff2a6d, #e11d48);
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 42, 109, 0.3);
+}
+
+.theme-pink .erp-btn-primary:hover {
+  background: linear-gradient(135deg, #e11d48, #be185d);
+  box-shadow: 0 6px 16px rgba(255, 42, 109, 0.4);
+}
+
+.theme-pink .erp-dashboard {
+  background-color: #faf7f9;
+}
+
+.theme-pink .erp-kpi-card {
+  border-color: #fce7f3;
+}
+
+.theme-pink .erp-kpi-card:hover {
+  border-color: #fbcfe8;
+  box-shadow: 0 8px 20px rgba(255, 42, 109, 0.08);
+}
+
+.theme-pink .erp-panel {
+  border-color: #fce7f3;
+}
+
+.theme-pink .erp-kpi-icon.pink {
+  background-color: #ffe6ee;
+  color: #ff2a6d;
 }
 
 .erp-btn-outline {
@@ -967,4 +1001,8 @@
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.commodity-row-hover:hover {
+  background-color: #f8fafc !important;
 }

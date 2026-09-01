@@ -157,6 +157,103 @@
   color: #e2e8f0;
 }
 
+/* =========== PINK THEME OVERRIDES (Image 1) =========== */
+.theme-pink .erp-sidebar {
+  background: #ffffff;
+  color: #0f172a;
+  border-right: 1px solid #f1f5f9;
+}
+
+.theme-pink .erp-sidebar-header {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.theme-pink .erp-brand-icon {
+  background: linear-gradient(135deg, #ff2a6d, #f43f5e);
+  color: white;
+  box-shadow: 0 3px 10px rgba(255, 42, 109, 0.3);
+}
+
+.theme-pink .erp-brand-name {
+  color: #0f172a;
+}
+
+.theme-pink .erp-brand-sub {
+  color: #ff2a6d;
+  font-weight: 600;
+}
+
+.theme-pink .erp-nav-group-title {
+  color: #f43f5e;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.theme-pink .erp-nav-item {
+  color: #475569;
+  border-left: none;
+  margin: 2px 8px;
+  border-radius: 12px;
+}
+
+.theme-pink .erp-nav-item:hover {
+  background-color: #fdf2f8;
+  color: #ff2a6d;
+}
+
+.theme-pink .erp-nav-item.active {
+  background: #ffe6ee;
+  color: #ff2a6d;
+  font-weight: 700;
+  border-radius: 20px;
+  border-left: none;
+  box-shadow: 0 2px 8px rgba(255, 42, 109, 0.12);
+}
+
+.theme-pink .erp-sidebar-footer {
+  border-top: 1px solid #f1f5f9;
+}
+
+.theme-pink .erp-collapse-btn {
+  background: #fdf2f8;
+  color: #db2777;
+  border: 1px solid #fbcfe8;
+}
+
+.theme-pink .erp-collapse-btn:hover {
+  background: #fce7f3;
+  color: #be185d;
+}
+
+.theme-pink .erp-content {
+  background-color: #fcf8fa;
+}
+
+/* =========== DARK BLUE THEME OVERRIDES (Image 2) =========== */
+.theme-dark-blue .erp-sidebar {
+  background: linear-gradient(180deg, #0b132b 0%, #0f172a 100%);
+  color: #f8fafc;
+  border-right: 1px solid #1e293b;
+}
+
+.theme-dark-blue .erp-brand-icon {
+  background: linear-gradient(135deg, #0088ff, #00d2ff);
+  color: white;
+  box-shadow: 0 3px 10px rgba(0, 136, 255, 0.3);
+}
+
+.theme-dark-blue .erp-nav-item.active {
+  background: rgba(0, 136, 255, 0.15);
+  color: #00a2ff;
+  border-left-color: #00a2ff;
+  font-weight: 700;
+}
+
+.theme-dark-blue .erp-content {
+  background-color: #f0f4f9;
+}
+
 /* =========== MAIN CONTENT AREA =========== */
 .erp-main-container {
   flex: 1;

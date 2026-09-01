@@ -1,21 +1,16 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { RotatingIndustryBackground } from '../auth/RotatingIndustryBackground';
 import {
   Package, Factory, ShieldCheck, Truck, BarChart2,
-  Settings, Sparkles, ChevronRight, ShoppingBag, ChevronDown,
-  Cpu, CheckCircle2, Building2, Play, ArrowRight
+  ChevronRight, ShoppingBag, ChevronDown,
+  Cpu, CheckCircle2, Building2
 } from 'lucide-react';
 import '../../pages/auth/auth.css';
 
 export const AuthLayout: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
-  const loginSectionRef = useRef<HTMLDivElement>(null);
-
-  const scrollToLogin = () => {
-    loginSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   if (isLoading) {
     return (
@@ -32,18 +27,21 @@ export const AuthLayout: React.FC = () => {
   return (
     <div className="auth-page">
 
-      {/* Scrollable container for swipe down / scroll down to next page */}
+      {/* ── SCROLL CONTAINER — transparent passthrough, body scrolls ── */}
       <div className="auth-scroll-container">
 
-        {/* PAGE 1: Main Full-Screen Hero Landing Page */}
-        <section className="auth-section auth-hero-section">
-          {/* Full-screen rotating photo background — strictly for Page 1 */}
-          <RotatingIndustryBackground intervalMs={5000} showControls={true} />
+        {/* ══════════════════════════════════════════════
+            PAGE 1 — HERO SECTION (100vh)
+            ══════════════════════════════════════════════ */}
+        <section id="home" className="auth-section auth-hero-section">
 
-          {/* Page 1 Tint Overlay */}
+          {/* Full-screen rotating photo background */}
+          <RotatingIndustryBackground intervalMs={5500} showControls={true} />
+
+          {/* Dark overlay — keeps image visible, text readable */}
           <div className="auth-page-overlay" />
 
-          {/* Top Header Navbar */}
+          {/* ── NAVBAR ─────────────────────────────────── */}
           <header className="landing-navbar">
             <div className="novax-logo-container">
               <div className="novax-logo-icon"><span>N</span></div>
@@ -53,239 +51,44 @@ export const AuthLayout: React.FC = () => {
 
             <nav className="landing-nav-links">
               <a href="#home" className="nav-link active">Home</a>
-              <a href="#industries" className="nav-link" onClick={(e) => { e.preventDefault(); scrollToLogin(); }}>Industries</a>
-              <a href="#features" className="nav-link" onClick={(e) => { e.preventDefault(); scrollToLogin(); }}>Features</a>
-              <a href="#resources" className="nav-link">Resources</a>
-              <a href="#about" className="nav-link">About Us</a>
-              <button className="nav-get-started-btn" onClick={scrollToLogin}>
+              <a href="#app-overview" className="nav-link">Industries</a>
+              <a href="#app-overview" className="nav-link">Features</a>
+              <a href="#app-overview" className="nav-link">Resources</a>
+              <a href="#app-overview" className="nav-link">About Us</a>
+              <a href="#app-overview" className="nav-get-started-btn">
                 Get Started
-              </button>
+              </a>
             </nav>
           </header>
 
-          <div className="auth-hero-content">
+          {/* ── HERO CONTENT — SPLIT GRID ──────────────── */}
+          <div className="auth-hero-split-grid">
 
-            {/* Main Headline */}
-            <h1 className="auth-headline">
-              SMART OPERATIONS.<br />
-              <span className="text-gradient-cyan">CONNECTED BUSINESSES.</span>
-            </h1>
+            {/* LEFT COLUMN — Executive Branding Headline */}
+            <div className="auth-hero-left-content">
 
-            {/* Subheadline */}
-            <p className="auth-subheadline">
-              AI-Powered ERP platform to manage, automate and grow your business across{' '}
-              <span className="highlight-industry">every industry</span>.
-            </p>
-
-            {/* Hero Action Buttons */}
-            <div className="hero-cta-buttons">
-              <button className="hero-btn-primary" onClick={scrollToLogin}>
-                <span>Explore NOVAX</span>
-                <ArrowRight size={16} />
-              </button>
-              <button className="hero-btn-secondary" onClick={scrollToLogin}>
-                <span>Watch Demo</span>
-                <Play size={14} fill="currentColor" />
-              </button>
-            </div>
-
-            {/* Operations flow strip */}
-            <div className="auth-flowchart-container">
-              <div className="flow-step">
-                <div className="flow-icon-wrapper"><ShoppingBag size={18} /></div>
-                <div className="flow-label">PROCUREMENT</div>
-              </div>
-              <ChevronRight className="flow-arrow" size={14} />
-              <div className="flow-step">
-                <div className="flow-icon-wrapper"><Package size={18} /></div>
-                <div className="flow-label">INVENTORY</div>
-              </div>
-              <ChevronRight className="flow-arrow" size={14} />
-              <div className="flow-step">
-                <div className="flow-icon-wrapper"><Factory size={18} /></div>
-                <div className="flow-label">PRODUCTION</div>
-              </div>
-              <ChevronRight className="flow-arrow" size={14} />
-              <div className="flow-step">
-                <div className="flow-icon-wrapper"><ShieldCheck size={18} /></div>
-                <div className="flow-label">QUALITY</div>
-              </div>
-              <ChevronRight className="flow-arrow" size={14} />
-              <div className="flow-step">
-                <div className="flow-icon-wrapper"><Truck size={18} /></div>
-                <div className="flow-label">LOGISTICS</div>
-              </div>
-              <ChevronRight className="flow-arrow" size={14} />
-              <div className="flow-step">
-                <div className="flow-icon-wrapper"><BarChart2 size={18} /></div>
-                <div className="flow-label">ANALYTICS</div>
-              </div>
-            </div>
-
-            {/* Middle Combined Row: Features + Platform Stats */}
-            <div className="hero-features-stats-row">
-              {/* Features (Left side) */}
-              <div className="auth-features-bottom-grid">
-                {[
-                  { icon: <Settings size={16} />, title: 'AI POWERED', sub: 'Smarter decisions with intelligent automation' },
-                  { icon: <BarChart2 size={16} />, title: 'REAL-TIME INSIGHTS', sub: 'Live visibility across all your operations' },
-                  { icon: <ShieldCheck size={16} />, title: 'SECURE & RELIABLE', sub: 'Enterprise-grade security you can trust' },
-                  { icon: <Sparkles size={16} />, title: 'BUILT FOR GROWTH', sub: 'Scalable platform to grow with your business' },
-                ].map((f) => (
-                  <div key={f.title} className="auth-feature-card">
-                    <div className="feature-card-icon">{f.icon}</div>
-                    <div className="feature-card-content">
-                      <div className="feature-card-title">{f.title}</div>
-                      <div className="feature-card-sub">{f.sub}</div>
-                    </div>
-                  </div>
-                ))}
+              {/* Eyebrow Badge */}
+              <div className="hero-eyebrow-badge">
+                <span>⚡ NEXT-GEN ENTERPRISE ERP</span>
               </div>
 
-              {/* Platform Stats (Right side) */}
-              <div className="platform-stats-box">
-                <div className="stat-item">
-                  <div className="stat-num">25+</div>
-                  <div className="stat-text">Industries</div>
-                </div>
-                <div className="stat-divider" />
-                <div className="stat-item">
-                  <div className="stat-num">10K+</div>
-                  <div className="stat-text">Businesses</div>
-                </div>
-                <div className="stat-divider" />
-                <div className="stat-item">
-                  <div className="stat-num">1M+</div>
-                  <div className="stat-text">Users</div>
-                </div>
-                <div className="stat-divider" />
-                <div className="stat-item">
-                  <div className="stat-num">99.9%</div>
-                  <div className="stat-text">Uptime</div>
-                </div>
-              </div>
-            </div>
+              {/* Main Headline */}
+              <h1 className="auth-headline">
+                Smart Operations.<br />
+                <span className="text-gradient-cyan">Connected Businesses.</span>
+              </h1>
 
-            {/* Industry Cards Thumbnail Carousel Strip */}
-            <div className="industry-thumbnails-strip-wrapper">
-              <div className="strip-title-label">
-                POWERING OPERATIONS ACROSS MULTIPLE <span className="highlight-blue">INDUSTRIES</span>
-              </div>
-              <div className="industry-cards-scroll-grid">
-                {[
-                  { name: 'Textile Manufacturing', img: '/images/textile-spinning.jpg' },
-                  { name: 'Poultry / Farm ERP', img: '/images/poultry-farm.jpg' },
-                  { name: 'Steel Manufacturing', img: '/images/steel-mill.jpg' },
-                  { name: 'Automobile Manufacturing', img: '/images/auto-assembly.jpg' },
-                  { name: 'Food Processing', img: '/images/food-processing.jpg' },
-                  { name: 'Logistics & Warehouse', img: '/images/warehouse-logistics.jpg' },
-                  { name: 'Sugar Manufacturing', img: '/images/sugarcane-mill.jpg' },
-                  { name: 'Pharmaceutical Manufacturing', img: '/images/food-processing.jpg' },
-                  { name: 'Cement Manufacturing', img: '/images/steel-mill.jpg' },
-                  { name: 'Agriculture & Farming', img: '/images/sugarcane-mill.jpg' },
-                  { name: 'Engineering Manufacturing', img: '/images/auto-assembly.jpg' },
-                  { name: 'FMCG Manufacturing', img: '/images/footwear-factory.jpg' },
-                ].map((ind) => (
-                  <div key={ind.name} className="industry-thumb-card" onClick={scrollToLogin}>
-                    <img src={ind.img} alt={ind.name} className="thumb-img" />
-                    <div className="thumb-overlay" />
-                    <span className="thumb-title">{ind.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-          </div>
-
-          {/* Swipe / Scroll Down prompt bar */}
-          <button className="auth-scroll-down-btn" onClick={scrollToLogin} aria-label="Scroll down to Login">
-            <span>SWIPE / SCROLL DOWN FOR LOGIN & APP DETAILS</span>
-            <ChevronDown size={18} className="scroll-down-arrow" />
-          </button>
-        </section>
-
-        {/* PAGE 2 (DOWNSIDE / NEXT PAGE): Dedicated Dark Background with App Details & Login Card */}
-        <section ref={loginSectionRef} className="auth-section auth-downside-section">
-          <div className="auth-downside-grid-container">
-
-            {/* LEFT — NOVAX App Info & Supported Industries */}
-            <div className="auth-app-info-panel">
-              <div className="novax-logo-container" style={{ marginBottom: '1rem' }}>
-                <div className="novax-logo-icon"><span>N</span></div>
-                <span className="novax-brand-text" style={{ fontSize: '1.7rem' }}>NOVAX</span>
-                <span className="novax-badge-pill">App Overview</span>
-              </div>
-
-              <h2 className="info-panel-title">
-                ENTERPRISE ERP POWERING<br />
-                <span className="text-gradient-cyan">MULTI-INDUSTRY OPERATIONS</span>
-              </h2>
-
-              <p className="info-panel-desc">
-                NOVAX seamlessly connects production, inventory, sales, logistics, and employee workflows into a single intelligent real-time control center.
+              {/* Refined Sub-caption */}
+              <p className="hero-tagline-sub">
+                Real-time intelligence and automated multi-role workflows engineered for modern enterprise productivity.
               </p>
 
-              {/* Supported Industries Badges */}
-              <div className="info-section-label">
-                <Building2 size={15} color="#38bdf8" /> INDUSTRIES CURRENTLY POWERED BY NOVAX
-              </div>
-              <div className="supported-industries-grid">
-                {[
-                  { name: 'Textile & Spinning Mills', icon: '🧵' },
-                  { name: 'Poultry & Farm ERP', icon: '🐓' },
-                  { name: 'Food & Beverage Processing', icon: '🥦' },
-                  { name: 'Automotive & Assembly', icon: '🚗' },
-                  { name: 'Steel & Heavy Manufacturing', icon: '🔩' },
-                  { name: 'Warehousing & Logistics', icon: '📦' },
-                  { name: 'Footwear & Consumer Goods', icon: '👟' },
-                  { name: 'Pharmaceutical Cleanrooms', icon: '💊' },
-                ].map((ind) => (
-                  <div key={ind.name} className="industry-info-badge">
-                    <span className="ind-icon">{ind.icon}</span>
-                    <span className="ind-name">{ind.name}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Key Platform Capabilities */}
-              <div className="info-section-label" style={{ marginTop: '1.2rem' }}>
-                <Cpu size={15} color="#818cf8" /> CORE PLATFORM HIGHLIGHTS
-              </div>
-              <div className="platform-highlights-list">
-                {[
-                  'Role-Based Portals for Admins, Managers, Buyers, Sellers & Employees',
-                  'AI Advisor for Predictive Demand, Maintenance & Inventory Alerts',
-                  'End-to-End Batch & Shed Tracking for Farm & Manufacturing Lines',
-                  'Automated Procurement, Purchase Orders & Supplier Quality Inspections'
-                ].map((item, idx) => (
-                  <div key={idx} className="highlight-list-item">
-                    <CheckCircle2 size={15} className="highlight-check-icon" />
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Stat metrics pill */}
-              <div className="info-metrics-row">
-                <div className="metric-box">
-                  <div className="metric-value">99.9%</div>
-                  <div className="metric-label">Uptime Guarantee</div>
-                </div>
-                <div className="metric-box">
-                  <div className="metric-value">256-Bit</div>
-                  <div className="metric-label">SSL Security</div>
-                </div>
-                <div className="metric-box">
-                  <div className="metric-value">Multi-Role</div>
-                  <div className="metric-label">Smart Access</div>
-                </div>
-              </div>
             </div>
 
-            {/* RIGHT — Dedicated Login / Register Card */}
-            <div className="auth-downside-card-column">
+            {/* RIGHT COLUMN — Login Card */}
+            <div className="auth-hero-right-login-column">
               <Outlet />
-              <div className="auth-secure-footer" style={{ marginTop: '1.2rem' }}>
+              <div className="auth-secure-footer">
                 <div className="auth-secure-footer-title">
                   <ShieldCheck size={13} color="#10b981" /> Protected by Enterprise Security
                 </div>
@@ -293,10 +96,190 @@ export const AuthLayout: React.FC = () => {
               </div>
             </div>
 
-          </div>
-        </section>
+          </div>{/* /auth-hero-split-grid */}
 
-      </div>
+          {/* ── HERO BOTTOM BAR — Process flow + Scroll indicator ── */}
+          <div className="hero-bottom-bar">
+
+            {/* Operations Process Flow */}
+            <div className="auth-flowchart-container">
+              <div className="flow-step">
+                <div className="flow-icon-wrapper"><ShoppingBag size={13} /></div>
+                <span className="flow-label">PROCUREMENT</span>
+              </div>
+              <ChevronRight className="flow-arrow" size={12} />
+              <div className="flow-step">
+                <div className="flow-icon-wrapper"><Package size={13} /></div>
+                <span className="flow-label">INVENTORY</span>
+              </div>
+              <ChevronRight className="flow-arrow" size={12} />
+              <div className="flow-step">
+                <div className="flow-icon-wrapper"><Factory size={13} /></div>
+                <span className="flow-label">PRODUCTION</span>
+              </div>
+              <ChevronRight className="flow-arrow" size={12} />
+              <div className="flow-step">
+                <div className="flow-icon-wrapper"><ShieldCheck size={13} /></div>
+                <span className="flow-label">QUALITY</span>
+              </div>
+              <ChevronRight className="flow-arrow" size={12} />
+              <div className="flow-step">
+                <div className="flow-icon-wrapper"><Truck size={13} /></div>
+                <span className="flow-label">LOGISTICS</span>
+              </div>
+              <ChevronRight className="flow-arrow" size={12} />
+              <div className="flow-step">
+                <div className="flow-icon-wrapper"><BarChart2 size={13} /></div>
+                <span className="flow-label">ANALYTICS</span>
+              </div>
+            </div>
+
+            {/* Scroll Down Anchor Button */}
+            <a href="#app-overview" className="auth-scroll-down-btn" aria-label="Scroll down for app overview">
+              <span>SCROLL DOWN FOR APP OVERVIEW &amp; HIGHLIGHTS</span>
+              <ChevronDown size={16} className="scroll-down-arrow" />
+            </a>
+
+          </div>{/* /hero-bottom-bar */}
+
+          {/* Smooth Fade Transition Overlay at bottom of hero */}
+          <div className="hero-bottom-fade-gradient" />
+
+        </section>{/* /auth-hero-section */}
+
+        {/* ══════════════════════════════════════════════
+            PAGE 2 — STRUCTURED NOVAX PLATFORM OVERVIEW
+            ══════════════════════════════════════════════ */}
+        <section id="app-overview" className="auth-section auth-downside-section">
+          <div className="auth-downside-grid-container" style={{ gridTemplateColumns: '1fr' }}>
+
+            {/* Full-width Structured App Overview Panel */}
+            <div className="auth-app-info-panel" style={{ maxWidth: '1000px', margin: '0 auto', gap: '2rem' }}>
+              
+              {/* Header */}
+              <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem' }}>
+                <div className="novax-badge-pill" style={{ fontSize: '0.75rem', padding: '0.3rem 0.8rem' }}>
+                  🚀 PLATFORM OVERVIEW
+                </div>
+                <h2 className="info-panel-title" style={{ fontSize: '2.2rem', textAlign: 'center' }}>
+                  NEXT-GENERATION ENTERPRISE ARCHITECTURE
+                </h2>
+                <p className="info-panel-desc" style={{ textAlign: 'center', maxWidth: '750px', fontSize: '1rem', color: '#94a3b8' }}>
+                  NOVAX unites shop-floor machine intelligence, multi-warehouse logistics, financial ledgers, and automated workforce management into a single real-time enterprise platform.
+                </p>
+              </div>
+
+              {/* 6 Core Modules Grid */}
+              <div className="info-section-label" style={{ marginTop: '0.5rem' }}>
+                <Cpu size={15} color="#38bdf8" /> CORE ENTERPRISE MODULES
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.2rem' }}>
+                {[
+                  {
+                    icon: <Factory size={22} color="#38bdf8" />,
+                    title: 'Manufacturing Control',
+                    desc: 'Real-time spinning & loom tracking, work order scheduling, yield analytics, and machine OEE diagnostics.'
+                  },
+                  {
+                    icon: <Package size={22} color="#818cf8" />,
+                    title: 'Inventory & Supply Chain',
+                    desc: 'Multi-location warehouse tracking, batch lot traceability, barcode scanning, and automated reorder alerts.'
+                  },
+                  {
+                    icon: <ShoppingBag size={22} color="#c084fc" />,
+                    title: 'Procurement & B2B Sales',
+                    desc: 'Supplier purchase order management, wholesale B2B quotation engine, and buyer/seller portals.'
+                  },
+                  {
+                    icon: <BarChart2 size={22} color="#34d399" />,
+                    title: 'Financials & AI Insights',
+                    desc: 'General ledger accounting, operational cost-center tracking, profit margins, and AI demand forecasting.'
+                  },
+                  {
+                    icon: <Building2 size={22} color="#fbbf24" />,
+                    title: 'Workforce Governance',
+                    desc: 'Multi-role portal access for Admins, Managers, Buyers, Sellers, and Employees with granular permissions.'
+                  },
+                  {
+                    icon: <ShieldCheck size={22} color="#f43f5e" />,
+                    title: 'Security & Compliance',
+                    desc: '256-bit SSL encryption, immutable audit logging, role segregation, and 99.99% high-availability uptime.'
+                  }
+                ].map((mod, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      background: 'rgba(15, 23, 42, 0.65)',
+                      border: '1px solid rgba(255, 255, 255, 0.09)',
+                      borderRadius: '14px',
+                      padding: '1.3rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.6rem',
+                      backdropFilter: 'blur(12px)'
+                    }}
+                  >
+                    <div style={{ background: 'rgba(255, 255, 255, 0.06)', width: '42px', height: '42px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {mod.icon}
+                    </div>
+                    <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#f8fafc' }}>{mod.title}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#94a3b8', lineHeight: 1.5 }}>{mod.desc}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 3-Step Enterprise Deployment Workflow */}
+              <div className="info-section-label" style={{ marginTop: '1rem' }}>
+                <CheckCircle2 size={15} color="#34d399" /> HOW NOVAX OPERATES IN 3 STEPS
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                {[
+                  { step: '01', title: 'Connect & Ingest', text: 'Integrate floor machinery, warehouse stock, and department roles into unified digital ledgers.' },
+                  { step: '02', title: 'Automate & Optimize', text: 'AI engines detect bottlenecks, auto-dispatch purchase orders, and optimize machine scheduling.' },
+                  { step: '03', title: 'Execute & Scale', text: 'Empower Admins, Managers, Sellers, Buyers, and Employees with real-time role-tailored dashboards.' }
+                ].map((st) => (
+                  <div
+                    key={st.step}
+                    style={{
+                      background: 'rgba(10, 15, 30, 0.50)',
+                      border: '1px solid rgba(56, 189, 248, 0.20)',
+                      borderRadius: '12px',
+                      padding: '1.1rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.4rem'
+                    }}
+                  >
+                    <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#38bdf8', letterSpacing: '0.1em' }}>STEP {st.step}</span>
+                    <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#f1f5f9' }}>{st.title}</span>
+                    <span style={{ fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.45 }}>{st.text}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Trust & SLA Metrics Banner */}
+              <div className="info-metrics-row" style={{ marginTop: '1rem' }}>
+                <div className="metric-box">
+                  <div className="metric-value">99.99%</div>
+                  <div className="metric-label">Uptime SLA Guarantee</div>
+                </div>
+                <div className="metric-box">
+                  <div className="metric-value">256-Bit</div>
+                  <div className="metric-label">SSL & Role-Based Access</div>
+                </div>
+                <div className="metric-box">
+                  <div className="metric-value">Real-Time</div>
+                  <div className="metric-label">Multi-Role Operation Sync</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>{/* /app-overview */}
+
+      </div>{/* /auth-scroll-container */}
     </div>
   );
 };

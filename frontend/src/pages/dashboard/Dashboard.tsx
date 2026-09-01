@@ -2,15 +2,17 @@ import React, { useEffect, useState } from 'react';
 import {
   Activity, ClipboardList, ShieldCheck, PackageSearch, Wrench, Truck,
   ArrowUpRight, ArrowDownRight, CheckCircle, Clock,
-  Users, ShoppingCart, FileText, Plus, Download, Calendar
+  Users, ShoppingCart, FileText, Plus, Download, Star, RefreshCw
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import './dashboard.css';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { api } from '../../services/api';
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const role = user?.role || 'Employee';
 
@@ -45,10 +47,8 @@ export const Dashboard: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [chartPeriod, setChartPeriod] = useState('this_week');
-  const [showCustomPicker, setShowCustomPicker] = useState(false);
-  const [customMonth, setCustomMonth] = useState(''); // '' = full year, '01'-'12' = specific month
-  const [customYear, setCustomYear] = useState(new Date().getFullYear());
   const [showNewOrderModal, setShowNewOrderModal] = useState(false);
+  const [selectedCommodity, setSelectedCommodity] = useState<any>(null);
 
   // ---------- CHART DATA PER PERIOD ----------
   type ChartEntry = { label: string; planned: number; actual: number; target: number };
@@ -104,6 +104,9 @@ export const Dashboard: React.FC = () => {
       data,
     };
   };
+
+  void generateMonthChart;
+  void generateYearChart;
 
   const chartDataSets: Record<string, { data: ChartEntry[]; max: number; title: string }> = {
     this_week: {
@@ -180,18 +183,12 @@ export const Dashboard: React.FC = () => {
     },
   };
 
-  // Resolve chart: preset or custom
+  // Resolve chart: preset
   const getActiveChart = () => {
-    if (chartPeriod === 'custom') {
-      if (customMonth) {
-        return generateMonthChart(customYear, parseInt(customMonth));
-      }
-      return generateYearChart(customYear);
-    }
     return chartDataSets[chartPeriod] || chartDataSets.this_week;
   };
 
-  const currentChart = getActiveChart();
+  void getActiveChart();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -365,8 +362,8 @@ export const Dashboard: React.FC = () => {
       {/* ===== PAGE HEADER ===== */}
       <div className="erp-page-header">
         <div>
-          <h1 className="erp-page-title">Executive Dashboard</h1>
-          <p className="erp-page-subtitle">Welcome back, {user?.firstName || 'its nobody'}! Here's what's happening in your factory today.</p>
+          <h1 className="erp-page-title">Dashboard</h1>
+          <p className="erp-page-subtitle">Welcome back, {user?.firstName || 'Alex'}! 👋 Here's what's happening in your factory today.</p>
         </div>
         <div className="erp-header-actions">
           <button className="erp-btn erp-btn-outline" onClick={handleDownloadReport}>
@@ -378,452 +375,602 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* ===== 6 KPI CARDS ===== */}
+      {/* ===== 6 KPI CARDS WITH SPARKLINE AREA CHARTS ===== */}
       <div className="erp-kpi-grid">
+        {/* Production Today */}
         <div className="erp-kpi-card" onClick={() => go('production')}>
           <div className="erp-kpi-header">
             <h3 className="erp-kpi-title">Production Today</h3>
-            <div className="erp-kpi-icon blue"><Activity size={18} /></div>
+            <div className={`erp-kpi-icon ${theme === 'pink' ? 'pink' : 'blue'}`}>
+              <Activity size={18} />
+            </div>
           </div>
           <p className="erp-kpi-value">1,245 m</p>
-          <div className="erp-kpi-footer">
+          <div className="erp-kpi-footer" style={{ marginBottom: '0.4rem' }}>
             <span className="erp-kpi-trend positive"><ArrowUpRight size={12} /> 4.5%</span>
             <span className="erp-kpi-trend neutral">vs yesterday</span>
           </div>
+          <div style={{ marginTop: 'auto', paddingTop: '0.2rem' }}>
+            <svg viewBox="0 0 100 24" width="100%" height="24">
+              <path
+                d="M0,18 Q15,12 30,20 T60,8 T90,16 L100,10 L100,24 L0,24 Z"
+                fill={theme === 'pink' ? 'rgba(255, 42, 109, 0.15)' : 'rgba(0, 136, 255, 0.15)'}
+              />
+              <path
+                d="M0,18 Q15,12 30,20 T60,8 T90,16 L100,10"
+                fill="none"
+                stroke={theme === 'pink' ? '#ff2a6d' : '#0088ff'}
+                strokeWidth="2"
+              />
+            </svg>
+          </div>
         </div>
 
+        {/* Active Work Orders */}
         <div className="erp-kpi-card" onClick={() => go('production')}>
           <div className="erp-kpi-header">
             <h3 className="erp-kpi-title">Active Work Orders</h3>
             <div className="erp-kpi-icon purple"><ClipboardList size={18} /></div>
           </div>
-          <p className="erp-kpi-value">{stats.activeWorkOrders || 12}</p>
-          <div className="erp-kpi-footer">
+          <p className="erp-kpi-value">{stats.activeWorkOrders || 3}</p>
+          <div className="erp-kpi-footer" style={{ marginBottom: '0.4rem' }}>
             <span className="erp-kpi-trend positive"><ArrowUpRight size={12} /> 2 new this morning</span>
+          </div>
+          <div style={{ marginTop: 'auto', paddingTop: '0.2rem' }}>
+            <svg viewBox="0 0 100 24" width="100%" height="24">
+              <path d="M0,20 Q20,15 40,22 T70,8 L100,14 L100,24 L0,24 Z" fill="rgba(168, 85, 247, 0.15)" />
+              <path d="M0,20 Q20,15 40,22 T70,8 L100,14" fill="none" stroke="#a855f7" strokeWidth="2" />
+            </svg>
           </div>
         </div>
 
+        {/* Quality Pass Rate */}
         <div className="erp-kpi-card" onClick={() => go('quality')}>
           <div className="erp-kpi-header">
             <h3 className="erp-kpi-title">Quality Pass Rate</h3>
             <div className="erp-kpi-icon green"><ShieldCheck size={18} /></div>
           </div>
           <p className="erp-kpi-value">{passRate}%</p>
-          <div className="erp-kpi-footer">
+          <div className="erp-kpi-footer" style={{ marginBottom: '0.4rem' }}>
             <span className="erp-kpi-trend positive"><ArrowUpRight size={12} /> 0.8%</span>
             <span className="erp-kpi-trend neutral">vs last week</span>
           </div>
+          <div style={{ marginTop: 'auto', paddingTop: '0.2rem' }}>
+            <svg viewBox="0 0 100 24" width="100%" height="24">
+              <path d="M0,16 Q25,20 50,12 T80,8 L100,5 L100,24 L0,24 Z" fill="rgba(34, 197, 94, 0.15)" />
+              <path d="M0,16 Q25,20 50,12 T80,8 L100,5" fill="none" stroke="#22c55e" strokeWidth="2" />
+            </svg>
+          </div>
         </div>
 
+        {/* Low Stock Items */}
         <div className="erp-kpi-card" onClick={() => go('inventory')}>
           <div className="erp-kpi-header">
             <h3 className="erp-kpi-title">Low Stock Items</h3>
             <div className="erp-kpi-icon red"><PackageSearch size={18} /></div>
           </div>
-          <p className="erp-kpi-value">{stats.lowStockItems || 5}</p>
-          <div className="erp-kpi-footer">
+          <p className="erp-kpi-value">{stats.lowStockItems || 2}</p>
+          <div className="erp-kpi-footer" style={{ marginBottom: '0.4rem' }}>
             <span className="erp-kpi-trend negative"><ArrowDownRight size={12} /> Action required</span>
+          </div>
+          <div style={{ marginTop: 'auto', paddingTop: '0.2rem' }}>
+            <svg viewBox="0 0 100 24" width="100%" height="24">
+              <path d="M0,10 Q20,18 40,14 T70,22 L100,16 L100,24 L0,24 Z" fill="rgba(239, 68, 68, 0.15)" />
+              <path d="M0,10 Q20,18 40,14 T70,22 L100,16" fill="none" stroke="#ef4444" strokeWidth="2" />
+            </svg>
           </div>
         </div>
 
+        {/* Machines Running */}
         <div className="erp-kpi-card" onClick={() => go('machines')}>
           <div className="erp-kpi-header">
             <h3 className="erp-kpi-title">Machines Running</h3>
             <div className="erp-kpi-icon cyan"><Wrench size={18} /></div>
           </div>
-          <p className="erp-kpi-value">{stats.runningMachines} / {stats.totalMachines || 24}</p>
-          <div className="erp-kpi-footer">
-            <span className="erp-kpi-trend neutral">{stats.totalMachines > 0 ? Math.round((stats.runningMachines / stats.totalMachines) * 100) : 75}% Operational</span>
+          <p className="erp-kpi-value">{stats.runningMachines || 2} / {stats.totalMachines || 4}</p>
+          <div className="erp-kpi-footer" style={{ marginBottom: '0.4rem' }}>
+            <span className="erp-kpi-trend neutral">50% Operational</span>
+          </div>
+          <div style={{ marginTop: 'auto', paddingTop: '0.2rem' }}>
+            <svg viewBox="0 0 100 24" width="100%" height="24">
+              <path d="M0,18 H15 V10 H35 V22 H55 V8 H75 V18 H100" fill="none" stroke="#0088ff" strokeWidth="2" />
+            </svg>
           </div>
         </div>
 
+        {/* On-Time Delivery */}
         <div className="erp-kpi-card" onClick={() => go('logistics')}>
           <div className="erp-kpi-header">
             <h3 className="erp-kpi-title">On-Time Delivery</h3>
             <div className="erp-kpi-icon teal"><Truck size={18} /></div>
           </div>
           <p className="erp-kpi-value">{onTimeRate}%</p>
-          <div className="erp-kpi-footer">
+          <div className="erp-kpi-footer" style={{ marginBottom: '0.4rem' }}>
             <span className="erp-kpi-trend positive"><ArrowUpRight size={12} /> 2.1%</span>
             <span className="erp-kpi-trend neutral">vs last week</span>
           </div>
+          <div style={{ marginTop: 'auto', paddingTop: '0.2rem' }}>
+            <svg viewBox="0 0 100 24" width="100%" height="24">
+              <path d="M0,18 Q20,12 40,18 T70,8 L100,12 L100,24 L0,24 Z" fill="rgba(34, 197, 94, 0.15)" />
+              <path d="M0,18 Q20,12 40,18 T70,8 L100,12" fill="none" stroke="#22c55e" strokeWidth="2" />
+            </svg>
+          </div>
         </div>
       </div>
 
-      {/* ===== PRODUCTION CHART + AI ADVISOR ===== */}
+      {/* ===== SECONDARY STAT CARDS ROW (5 CARDS WITH AVATARS, DONUT, SPARKLINES) ===== */}
+      <div className="bottom-stats-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem' }}>
+        {/* Total Employees */}
+        <div className="bottom-stat-card" style={{ background: '#ffffff', borderRadius: '12px', padding: '1rem', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className={`erp-kpi-icon ${theme === 'pink' ? 'pink' : 'blue'}`} style={{ width: '32px', height: '32px' }}>
+              <Users size={16} />
+            </div>
+            <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>TOTAL EMPLOYEES</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+            <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>23</span>
+            <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 600 }}>↑ 12 this month</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '-4px', marginTop: '0.2rem' }}>
+            {['#f43f5e', '#a855f7', '#3b82f6', '#10b981', '#f59e0b'].map((bg, idx) => (
+              <div key={idx} style={{
+                width: '24px', height: '24px', borderRadius: '50%', background: bg, border: '2px solid white',
+                marginLeft: idx === 0 ? 0 : '-6px', color: 'white', fontSize: '0.65rem', fontWeight: 700,
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}>
+                {String.fromCharCode(65 + idx)}
+              </div>
+            ))}
+            <span style={{ marginLeft: '6px', fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>+18</span>
+          </div>
+        </div>
+
+        {/* Today's Attendance */}
+        <div className="bottom-stat-card" style={{ background: '#ffffff', borderRadius: '12px', padding: '1rem', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="erp-kpi-icon green" style={{ width: '32px', height: '32px' }}>
+              <CheckCircle size={16} />
+            </div>
+            <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>TODAY'S ATTENDANCE</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a' }}>186 / 23</div>
+              <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 600 }}>0% Present</span>
+            </div>
+            {/* Donut Progress SVG */}
+            <div style={{ width: '42px', height: '42px', position: 'relative' }}>
+              <svg viewBox="0 0 36 36" width="42" height="42">
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e2e8f0" strokeWidth="3.5" />
+                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#ff2a6d" strokeWidth="3.5" strokeDasharray="80, 100" />
+              </svg>
+              <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 800, color: '#0f172a' }}>
+                80%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Pending Work Orders */}
+        <div className="bottom-stat-card" style={{ background: '#ffffff', borderRadius: '12px', padding: '1rem', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="erp-kpi-icon amber" style={{ width: '32px', height: '32px' }}>
+              <ClipboardList size={16} />
+            </div>
+            <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>PENDING WORK ORDERS</span>
+          </div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a' }}>2</div>
+          <span style={{ fontSize: '0.72rem', color: '#d97706', fontWeight: 600 }}>Require attention</span>
+          <svg viewBox="0 0 100 16" width="100%" height="16">
+            <path d="M0,12 Q25,6 50,14 T100,8" fill="none" stroke="#f59e0b" strokeWidth="2" />
+          </svg>
+        </div>
+
+        {/* Pending POs */}
+        <div className="bottom-stat-card" style={{ background: '#ffffff', borderRadius: '12px', padding: '1rem', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="erp-kpi-icon red" style={{ width: '32px', height: '32px' }}>
+              <ShoppingCart size={16} />
+            </div>
+            <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>PENDING POS</span>
+          </div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a' }}>1</div>
+          <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>Awaiting approval</span>
+          <svg viewBox="0 0 100 16" width="100%" height="16">
+            <path d="M0,10 Q30,14 60,6 T100,12" fill="none" stroke="#ff2a6d" strokeWidth="2" />
+          </svg>
+        </div>
+
+        {/* Pending Shipments */}
+        <div className="bottom-stat-card" style={{ background: '#ffffff', borderRadius: '12px', padding: '1rem', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="erp-kpi-icon purple" style={{ width: '32px', height: '32px' }}>
+              <Truck size={16} />
+            </div>
+            <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>PENDING SHIPMENTS</span>
+          </div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a' }}>3</div>
+          <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>To be dispatched</span>
+          <svg viewBox="0 0 100 16" width="100%" height="16">
+            <path d="M0,8 Q20,14 50,6 T100,10" fill="none" stroke="#a855f7" strokeWidth="2" />
+          </svg>
+        </div>
+      </div>
+
+      {/* ===== PRODUCTION OVERVIEW, MACHINES BY EFFICIENCY, RECENT ACTIVITY ===== */}
       <div className="erp-panel-grid">
-        <div className="erp-panel col-span-8">
+        {/* Production Overview Area Chart */}
+        <div className="erp-panel col-span-4" style={{ position: 'relative' }}>
           <div className="erp-panel-header">
-            <h3 className="erp-panel-title">{currentChart.title}</h3>
-            <div className="chart-controls">
-              <select
-                className="chart-period-select"
-                value={chartPeriod}
-                onChange={(e) => {
-                  setChartPeriod(e.target.value);
-                  if (e.target.value !== 'custom') setShowCustomPicker(false);
-                }}
-              >
-                <option value="this_week">This Week</option>
-                <option value="last_week">Last Week</option>
-                <option value="this_month">This Month</option>
-                <option value="three_months">3 Months</option>
-                <option value="this_year">This Year</option>
-                {chartPeriod === 'custom' && <option value="custom">Custom</option>}
-              </select>
-              <button
-                className={`chart-custom-btn ${chartPeriod === 'custom' ? 'active' : ''}`}
-                title="Select custom month / year"
-                onClick={() => {
-                  setShowCustomPicker((prev: boolean) => !prev);
-                  if (chartPeriod !== 'custom') setChartPeriod('custom');
-                }}
-              >
-                <Calendar size={14} />
-                <span>Custom</span>
-              </button>
-            </div>
+            <h3 className="erp-panel-title">Production Overview</h3>
+            <select value={chartPeriod} onChange={(e) => setChartPeriod(e.target.value)} style={{ padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.75rem' }}>
+              <option value="this_week">This Week</option>
+              <option value="last_week">Last Week</option>
+              <option value="this_month">This Month</option>
+            </select>
           </div>
-
-          {/* Custom month/year picker row */}
-          {showCustomPicker && (
-            <div className="chart-custom-picker">
-              <div className="chart-picker-group">
-                <label className="chart-picker-label">Year</label>
-                <div className="chart-picker-stepper">
-                  <button onClick={() => setCustomYear((y: number) => y - 1)}>‹</button>
-                  <span className="chart-picker-value">{customYear}</span>
-                  <button onClick={() => setCustomYear((y: number) => y + 1)}>›</button>
-                </div>
-              </div>
-              <div className="chart-picker-group">
-                <label className="chart-picker-label">Month</label>
-                <select
-                  className="chart-period-select"
-                  value={customMonth}
-                  onChange={(e) => setCustomMonth(e.target.value)}
-                >
-                  <option value="">Full Year</option>
-                  {monthNames.map((m, i) => (
-                    <option key={m} value={String(i + 1).padStart(2, '0')}>{m}</option>
-                  ))}
-                </select>
-              </div>
-              <button
-                className="chart-picker-apply"
-                onClick={() => setShowCustomPicker(false)}
-              >
-                Apply
-              </button>
-            </div>
-          )}
           <div className="erp-panel-content">
-            <div className="chart-legend">
-              <div className="chart-legend-item"><div className="chart-legend-dot" style={{ background: '#bfdbfe' }} /> Planned (m)</div>
-              <div className="chart-legend-item"><div className="chart-legend-dot" style={{ background: '#2563eb' }} /> Actual (m)</div>
-              <div className="chart-legend-item"><div className="chart-legend-dot" style={{ background: '#10b981' }} /> Target (m)</div>
-            </div>
-            <div className="chart-container">
-              <div className="chart-bars">
-                {currentChart.data.map((d) => (
-                  <div className="chart-day-group" key={d.label}>
-                    <div className="chart-bars-wrapper">
-                      {d.planned > 0 && (
-                        <div className="chart-bar planned" style={{ height: `${(d.planned / currentChart.max) * 180}px` }} />
-                      )}
-                      {d.actual > 0 && (
-                        <div className="chart-bar actual" style={{ height: `${(d.actual / currentChart.max) * 180}px` }}>
-                          <span className="chart-value-label">{d.actual.toLocaleString()}</span>
-                        </div>
-                      )}
-                      <div
-                        className="chart-bar target"
-                        style={{
-                          height: `${(d.target / currentChart.max) * 180}px`,
-                          opacity: d.actual === 0 ? 0.4 : 1,
-                        }}
-                      />
-                      {d.actual === 0 && d.target > 0 && (
-                        <span style={{ fontSize: '0.6rem', color: '#94a3b8', position: 'absolute', top: -16, whiteSpace: 'nowrap' }}>—</span>
-                      )}
-                    </div>
-                    <span className="chart-day-label">{d.label}</span>
-                  </div>
-                ))}
+            <div style={{ position: 'relative', marginTop: '1.2rem' }}>
+              <div style={{
+                position: 'absolute', top: '5%', left: '55%', transform: 'translateX(-50%)',
+                background: theme === 'pink' ? '#ff2a6d' : '#0088ff', color: 'white',
+                padding: '2px 8px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 800,
+                boxShadow: '0 4px 10px rgba(0,0,0,0.15)', zIndex: 10
+              }}>
+                1,245 m
+              </div>
+              <svg viewBox="0 0 300 120" width="100%" height="130">
+                <defs>
+                  <linearGradient id="areaGradBottom" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={theme === 'pink' ? '#ff2a6d' : '#0088ff'} stopOpacity="0.3" />
+                    <stop offset="100%" stopColor={theme === 'pink' ? '#ff2a6d' : '#0088ff'} stopOpacity="0.0" />
+                  </linearGradient>
+                </defs>
+                <path d="M 10 90 Q 50 85 90 70 T 170 30 T 250 80 T 290 85 L 290 120 L 10 120 Z" fill="url(#areaGradBottom)" />
+                <path d="M 10 90 Q 50 85 90 70 T 170 30 T 250 80 T 290 85" fill="none" stroke={theme === 'pink' ? '#ff2a6d' : '#0088ff'} strokeWidth="3" />
+                <circle cx="170" cy="30" r="5" fill={theme === 'pink' ? '#ff2a6d' : '#0088ff'} stroke="white" strokeWidth="2" />
+              </svg>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: '#94a3b8', marginTop: '0.3rem' }}>
+                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* AI Business Advisor */}
-        {role === 'Admin' && (
-          <div className="erp-panel erp-ai-panel col-span-4">
-            <div className="erp-panel-header">
-              <h3 className="erp-panel-title erp-ai-title">AI Business Advisor (Demo)</h3>
-              <a className="erp-panel-action" onClick={() => go('ai-insights')} style={{ cursor: 'pointer' }}>View All</a>
-            </div>
-            <div className="erp-panel-content">
-              <div className="erp-ai-list">
-                <div className="erp-ai-item">
-                  <div className="erp-ai-dot warning" />
-                  <div className="erp-ai-content">
-                    <p><strong>{stats.lowStockItems || 5} materials</strong> are below minimum stock level.<br />Reorder to avoid production delays.</p>
-                  </div>
-                  <button className="erp-ai-action-btn" onClick={() => go('procurement')}>Create PO</button>
-                </div>
-                <div className="erp-ai-item">
-                  <div className="erp-ai-dot info" />
-                  <div className="erp-ai-content">
-                    <p><strong>Machine D-01</strong> is under maintenance.<br />Expected downtime: 3 hours.</p>
-                  </div>
-                  <button className="erp-ai-action-btn" onClick={() => go('machines')}>View Schedule</button>
-                </div>
-                <div className="erp-ai-item">
-                  <div className="erp-ai-dot danger" />
-                  <div className="erp-ai-content">
-                    <p><strong>Work Order WO-105</strong> may miss delivery date.<br />Consider reassigning resources.</p>
-                  </div>
-                  <button className="erp-ai-action-btn" onClick={() => go('production')}>Optimize</button>
-                </div>
-                <div className="erp-ai-item">
-                  <div className="erp-ai-dot success" />
-                  <div className="erp-ai-content">
-                    <p><strong>Quality pass rate</strong> is excellent this week.<br />Keep up the good work!</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {role === 'Manager' && (
-          <div className="erp-panel col-span-4">
-            <div className="erp-panel-header">
-              <h3 className="erp-panel-title">Alerts & Notifications</h3>
-            </div>
-            <div className="erp-panel-content">
-              <div className="erp-ai-list">
-                <div className="erp-ai-item">
-                  <div className="erp-ai-dot warning" />
-                  <div className="erp-ai-content"><p><strong>{stats.lowStockItems}</strong> items are low on stock.</p></div>
-                  <button className="erp-ai-action-btn" onClick={() => go('inventory')}>View</button>
-                </div>
-                <div className="erp-ai-item">
-                  <div className="erp-ai-dot info" />
-                  <div className="erp-ai-content"><p><strong>{stats.pendingWorkOrders}</strong> work orders pending approval.</p></div>
-                  <button className="erp-ai-action-btn" onClick={() => go('production')}>Review</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* ===== MACHINE STATUS + INVENTORY SNAPSHOT + RECENT ACTIVITIES ===== */}
-      <div className="erp-panel-grid">
-        {/* Machine Status */}
+        {/* Top Machines by Efficiency */}
         <div className="erp-panel col-span-4">
           <div className="erp-panel-header">
-            <h3 className="erp-panel-title">Machine Status</h3>
-            <a className="erp-panel-action" onClick={() => go('machines')} style={{ cursor: 'pointer' }}>View All</a>
+            <h3 className="erp-panel-title">Top Machines by Efficiency</h3>
+            <select style={{ padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.75rem' }}>
+              <option>This Month</option>
+            </select>
           </div>
-          <div className="erp-panel-content" style={{ padding: 0 }}>
-            <table className="dash-table">
+          <div className="erp-panel-content" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', justifyContent: 'center' }}>
+            {[
+              { name: 'Machine D-01', val: 92, color: '#16a34a' },
+              { name: 'Machine D-02', val: 78, color: '#0284c7' },
+              { name: 'Machine D-03', val: 65, color: '#f59e0b' },
+              { name: 'Machine D-04', val: 50, color: '#ff2a6d' },
+            ].map((m, idx) => (
+              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <span style={{ width: '90px', fontSize: '0.76rem', fontWeight: 600, color: '#475569' }}>{m.name}</span>
+                <div style={{ flex: 1, height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ width: `${m.val}%`, height: '100%', background: m.color, borderRadius: '4px' }} />
+                </div>
+                <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#0f172a', width: '32px', textAlign: 'right' }}>{m.val}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Activity Timeline */}
+        <div className="erp-panel col-span-4">
+          <div className="erp-panel-header">
+            <h3 className="erp-panel-title">Recent Activity</h3>
+          </div>
+          <div className="erp-panel-content" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {recentActivities.map((act: any, idx: number) => {
+              const colorMap: Record<string, string> = { production: '#16a34a', procurement: '#0284c7', sales: '#3b82f6', maintenance: '#a855f7', inventory: '#ef4444' };
+              const iconMap: Record<string, string> = { production: '✓', procurement: '+', sales: '★', maintenance: '🔧', inventory: '⚠️' };
+              const color = colorMap[act.tag] || '#16a34a';
+              const icon = iconMap[act.tag] || '✓';
+              return (
+                <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: idx < recentActivities.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                    <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: color, color: 'white', fontSize: '0.65rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {icon}
+                    </div>
+                    <span style={{ fontSize: '0.78rem', color: '#334155', fontWeight: 600 }}>{act.title}</span>
+                  </div>
+                  <span style={{ fontSize: '0.7rem', color: theme === 'pink' ? '#ff2a6d' : '#0088ff', fontWeight: 600 }}>{act.time}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* ===== COMMODITIES & TEXTILES LIVE MARKET SECTION + AI ADVISOR ===== */}
+      <div className="erp-panel-grid">
+        {/* Commodities Table */}
+        <div className="erp-panel col-span-8" style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="erp-panel-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '0.85rem' }}>
+            <div>
+              <h3 className="erp-panel-title" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span style={{ fontSize: '1.1rem' }}>📈</span> Commodities & Textiles (Live Market)
+              </h3>
+              <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.78rem', color: '#64748b' }}>
+                Real-time futures, raw fiber indices & market spot pricing
+              </p>
+            </div>
+            <div className="chart-controls" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span className="erp-kpi-trend positive" style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '0.72rem', background: '#dcfce7', color: '#15803d', fontWeight: 700 }}>
+                ● Live Feed Active
+              </span>
+            </div>
+          </div>
+
+          <div className="erp-panel-content" style={{ padding: '0.75rem 0' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+              <thead>
+                <tr style={{ textAlign: 'left', borderBottom: '1px solid #f1f5f9', color: '#64748b', fontSize: '0.7rem', textTransform: 'uppercase' }}>
+                  <th style={{ padding: '0.6rem 0.5rem' }}>COMMODITY</th>
+                  <th style={{ padding: '0.6rem 0.5rem' }}>SOURCE</th>
+                  <th style={{ padding: '0.6rem 0.5rem', textAlign: 'right' }}>PRICE</th>
+                  <th style={{ padding: '0.6rem 0.5rem', textAlign: 'right' }}>CHANGE</th>
+                  <th style={{ padding: '0.6rem 0.5rem', textAlign: 'center' }}>TREND</th>
+                  <th style={{ padding: '0.6rem 0.5rem', textAlign: 'center' }}></th>
+                </tr>
+              </thead>
               <tbody>
-                {(stats.machines.length > 0 ? stats.machines.slice(0, 5) : [
-                  { id: '1', name: 'Weaving Loom M-01', type: 'Weaving Loom', status: 'Running', oee: 82 },
-                  { id: '2', name: 'Weaving Loom M-02', type: 'Weaving Loom', status: 'Idle', oee: 60 },
-                  { id: '3', name: 'Dyeing Machine D-01', type: 'Dyeing Machine', status: 'Maintenance', oee: 0 },
-                  { id: '4', name: 'Spinning Machine S-01', type: 'Spinning Machine', status: 'Running', oee: 78 },
-                  { id: '5', name: 'Finishing Machine F-01', type: 'Finishing Machine', status: 'Running', oee: 85 },
-                ]).map((m: any, idx: number) => (
-                  <tr key={m.id || idx}>
-                    <td>
-                      <div className="machine-info">
-                        <span className="machine-name">{m.name}</span>
-                        <span className="machine-type">{m.type}</span>
+                {[
+                  { id: 'cotton', name: 'Cotton', indexName: 'ICE Cotton Futures', source: 'ICE', price: '82.63', change: '+0.45 (+0.54%)', isPositive: true, icon: '🧶' },
+                  { id: 'linen', name: 'Linen (Fabric)', indexName: 'LME Linen Futures', source: 'LME', price: '1,785.50', change: '-8.50 (-0.47%)', isPositive: false, icon: '📜' },
+                  { id: 'silk', name: 'Silk', indexName: 'Global Silk Index', source: 'GSI', price: '2,348.75', change: '-15.25 (-0.64%)', isPositive: false, icon: '🧵' },
+                  { id: 'polyester', name: 'Polyester', indexName: 'Polyester Fiber Index', source: 'PFI', price: '910.30', change: '-3.40 (-0.37%)', isPositive: false, icon: '🎨' },
+                  { id: 'wool', name: 'Wool', indexName: 'Wool Market Index', source: 'WMI', price: '1,243.60', change: '+6.20 (+0.50%)', isPositive: true, icon: '🐑' },
+                ].map((item) => (
+                  <tr key={item.id} style={{ borderBottom: '1px solid #f8fafc', cursor: 'pointer' }} onClick={() => setSelectedCommodity(item)}>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>
+                          {item.icon}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            {item.name}
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: item.isPositive ? '#16a34a' : '#dc2626' }} />
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{item.indexName}</div>
+                        </div>
                       </div>
                     </td>
-                    <td>
-                      <span className={`erp-status-badge ${m.status.toLowerCase()}`}>{m.status}</span>
+                    <td style={{ padding: '0.75rem 0.5rem', color: '#64748b', fontWeight: 600 }}>{item.source}</td>
+                    <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', fontWeight: 800, color: '#0f172a' }}>{item.price}</td>
+                    <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', fontWeight: 700, color: item.isPositive ? '#16a34a' : '#dc2626' }}>
+                      {item.change}
                     </td>
-                    <td style={{ color: '#64748b', fontSize: '0.75rem', textAlign: 'right' }}>
-                      OEE {m.oee ?? Math.floor(Math.random() * 30 + 60)}%
+                    <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center' }}>
+                      <svg viewBox="0 0 60 16" width="60" height="16">
+                        <path d={item.isPositive ? "M0,12 L15,10 L30,14 L45,6 L60,3" : "M0,4 L15,6 L30,3 L45,12 L60,15"} fill="none" stroke={item.isPositive ? '#16a34a' : '#dc2626'} strokeWidth="2" />
+                      </svg>
+                    </td>
+                    <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center', color: '#94a3b8' }}>
+                      <Star size={16} />
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-        </div>
-
-        {/* Inventory Snapshot */}
-        <div className="erp-panel col-span-4">
-          <div className="erp-panel-header">
-            <h3 className="erp-panel-title">Inventory Snapshot</h3>
-            <a className="erp-panel-action" onClick={() => go('inventory')} style={{ cursor: 'pointer' }}>View All</a>
-          </div>
-          <div className="erp-panel-content" style={{ padding: 0 }}>
-            <table className="dash-table">
-              <thead>
-                <tr>
-                  <th>Material</th>
-                  <th>Stock</th>
-                  <th>Min. Level</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(stats.materials.length > 0 ? stats.materials.slice(0, 5) : [
-                  { id: '1', name: 'Raw Cotton Grade A', currentStock: 12500, unit: 'kg', minStock: 5000, status: 'Healthy' },
-                  { id: '2', name: 'Raw Cotton Grade B', currentStock: 8000, unit: 'kg', minStock: 4000, status: 'Healthy' },
-                  { id: '3', name: 'Polyester Yarn', currentStock: 2500, unit: 'kg', minStock: 2000, status: 'Healthy' },
-                  { id: '4', name: 'Reactive Dye Blue', currentStock: 120, unit: 'kg', minStock: 200, status: 'Low Stock' },
-                  { id: '5', name: 'Reactive Dye Black', currentStock: 180, unit: 'kg', minStock: 200, status: 'Low Stock' },
-                ]).map((m: any, idx: number) => {
-                  const isLow = m.currentStock <= m.minStock;
-                  return (
-                    <tr key={m.id || idx}>
-                      <td style={{ fontWeight: 600, color: '#0f172a' }}>{m.name}</td>
-                      <td>{m.currentStock.toLocaleString()} {m.unit}</td>
-                      <td>{m.minStock.toLocaleString()} {m.unit}</td>
-                      <td>
-                        <span className={`erp-status-badge ${isLow ? 'low-stock' : 'healthy'}`}>
-                          {isLow ? 'Low Stock' : 'Healthy'}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Recent Activities */}
-        <div className="erp-panel col-span-4">
-          <div className="erp-panel-header">
-            <h3 className="erp-panel-title">Recent Activities</h3>
-            <a className="erp-panel-action" style={{ cursor: 'pointer' }}>View All</a>
-          </div>
-          <div className="erp-panel-content">
-            <div className="activity-list">
-              {recentActivities.map((a, idx) => (
-                <div className="activity-item" key={idx}>
-                  <span className="activity-time">{a.time}</span>
-                  <div className="activity-info">
-                    <p className="activity-title">{a.title}</p>
-                    <p className="activity-by">{a.by}</p>
-                  </div>
-                  <span className={`activity-tag ${a.tag}`}>{a.tag}</span>
-                </div>
-              ))}
+            <div style={{ textAlign: 'center', marginTop: '0.8rem' }}>
+              <button className="erp-btn erp-btn-outline" style={{ fontSize: '0.75rem', padding: '0.4rem 1rem', borderRadius: '20px', color: theme === 'pink' ? '#ff2a6d' : '#0088ff', borderColor: theme === 'pink' ? '#fbcfe8' : '#cbd5e1' }} onClick={() => navigate('/market')}>
+                View Full Market Insights →
+              </button>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* ===== BOTTOM STATS BAR ===== */}
-      <div className="bottom-stats-row">
-        <div className="bottom-stat-card">
-          <div className="bottom-stat-icon blue"><Users size={20} /></div>
-          <div className="bottom-stat-info">
-            <span className="bottom-stat-label">Total Employees</span>
-            <span className="bottom-stat-value">{stats.totalEmployees || 236}</span>
-            <span className="bottom-stat-sub">+ 12 this month</span>
+        {/* AI Business Advisor Card */}
+        <div className="erp-panel col-span-4" style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="erp-panel-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '0.85rem' }}>
+            <h3 className="erp-panel-title" style={{ color: theme === 'pink' ? '#ff2a6d' : '#0088ff', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              🤖 AI Business Advisor (Demo)
+            </h3>
+            <a className="erp-panel-action" onClick={() => go('ai-insights')} style={{ color: theme === 'pink' ? '#ff2a6d' : '#0088ff' }}>View All</a>
           </div>
-        </div>
+          <div className="erp-panel-content" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', paddingTop: '0.85rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.7rem', background: '#fef2f2', borderRadius: '10px', border: '1px solid #fecaca' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#fee2e2', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <RefreshCw size={14} />
+                </div>
+                <div style={{ fontSize: '0.76rem', color: '#334155' }}>
+                  <strong>2 materials</strong> are below minimum stock level.<br />Reorder to avoid production delays.
+                </div>
+              </div>
+              <button className="erp-btn erp-btn-outline" style={{ fontSize: '0.7rem', padding: '0.25rem 0.6rem', color: '#ef4444', borderColor: '#fca5a5' }} onClick={() => go('procurement')}>
+                Create PO
+              </button>
+            </div>
 
-        <div className="bottom-stat-card">
-          <div className="bottom-stat-icon green"><CheckCircle size={20} /></div>
-          <div className="bottom-stat-info">
-            <span className="bottom-stat-label">Today's Attendance</span>
-            <span className="bottom-stat-value">{stats.presentToday || 186} / {stats.totalEmployees || 236}</span>
-            <span className="bottom-stat-sub">{stats.totalEmployees > 0 ? Math.round((stats.presentToday / stats.totalEmployees) * 100) : 79}% Present</span>
-          </div>
-        </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.7rem', background: '#f0f9ff', borderRadius: '10px', border: '1px solid #bae6fd' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Wrench size={14} />
+                </div>
+                <div style={{ fontSize: '0.76rem', color: '#334155' }}>
+                  <strong>Machine D-01</strong> is under maintenance.<br />Expected downtime: 3 hours.
+                </div>
+              </div>
+              <button className="erp-btn erp-btn-outline" style={{ fontSize: '0.7rem', padding: '0.25rem 0.6rem', color: '#0284c7', borderColor: '#7dd3fc' }} onClick={() => go('machines')}>
+                View Schedule
+              </button>
+            </div>
 
-        <div className="bottom-stat-card">
-          <div className="bottom-stat-icon amber"><ClipboardList size={20} /></div>
-          <div className="bottom-stat-info">
-            <span className="bottom-stat-label">Pending Work Orders</span>
-            <span className="bottom-stat-value">{stats.pendingWorkOrders || 4}</span>
-            <span className="bottom-stat-sub neutral">Require attention</span>
-          </div>
-        </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.7rem', background: '#fff7ed', borderRadius: '10px', border: '1px solid #ffedd5' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#ffedd5', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <PackageSearch size={14} />
+                </div>
+                <div style={{ fontSize: '0.76rem', color: '#334155' }}>
+                  <strong>Work Order WO-105</strong> may miss delivery date.<br />Consider reassigning resources.
+                </div>
+              </div>
+              <button className="erp-btn erp-btn-outline" style={{ fontSize: '0.7rem', padding: '0.25rem 0.6rem', color: '#ea580c', borderColor: '#fdba74' }} onClick={() => go('production')}>
+                Optimize
+              </button>
+            </div>
 
-        <div className="bottom-stat-card">
-          <div className="bottom-stat-icon red"><ShoppingCart size={20} /></div>
-          <div className="bottom-stat-info">
-            <span className="bottom-stat-label">Pending POs</span>
-            <span className="bottom-stat-value">{stats.activePOs || 7}</span>
-            <span className="bottom-stat-sub neutral">Awaiting approval</span>
-          </div>
-        </div>
-
-        <div className="bottom-stat-card">
-          <div className="bottom-stat-icon purple"><Truck size={20} /></div>
-          <div className="bottom-stat-info">
-            <span className="bottom-stat-label">Pending Shipments</span>
-            <span className="bottom-stat-value">{stats.pendingShipments || 3}</span>
-            <span className="bottom-stat-sub neutral">To be dispatched</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.7rem', background: '#f0fdf4', borderRadius: '10px', border: '1px solid #bbf7d0' }}>
+              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <CheckCircle size={14} />
+              </div>
+              <div style={{ fontSize: '0.76rem', color: '#334155' }}>
+                <strong>Quality pass rate</strong> is excellent this week.<br />Keep up the good work!
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {showNewOrderModal && (
-        <div className="erp-modal-backdrop">
-          <div className="erp-modal">
-            <div className="erp-modal-header">
-              <h2>Create New Work Order</h2>
-              <button className="erp-modal-close" onClick={() => setShowNewOrderModal(false)}>&times;</button>
+        <div className="erp-modal-backdrop" style={{
+          position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+        }}>
+          <div className="erp-modal" style={{ background: '#ffffff', borderRadius: '16px', padding: '1.5rem', width: '90%', maxWidth: '450px', border: '1px solid #e2e8f0' }}>
+            <div className="erp-modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, color: '#0f172a' }}>Create New Work Order</h2>
+              <button className="erp-modal-close" onClick={() => setShowNewOrderModal(false)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer' }}>&times;</button>
             </div>
-            <div className="erp-modal-body">
+            <div className="erp-modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               <div className="erp-form-group">
-                <label>Product Type</label>
-                <select className="erp-input">
+                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569' }}>Product Type</label>
+                <select className="erp-input" style={{ width: '100%', padding: '0.45rem', borderRadius: '6px', border: '1px solid #cbd5e1', marginTop: '4px' }}>
                   <option>Premium Cotton Yarn</option>
                   <option>Polyester Blend</option>
                   <option>Denim Fabric</option>
                 </select>
               </div>
               <div className="erp-form-group">
-                <label>Target Quantity (kg)</label>
-                <input type="number" className="erp-input" defaultValue={1000} />
-              </div>
-              <div className="erp-form-group">
-                <label>Deadline</label>
-                <input type="date" className="erp-input" />
+                <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569' }}>Target Quantity (kg)</label>
+                <input type="number" className="erp-input" defaultValue={1000} style={{ width: '100%', padding: '0.45rem', borderRadius: '6px', border: '1px solid #cbd5e1', marginTop: '4px' }} />
               </div>
             </div>
-            <div className="erp-modal-footer">
+            <div className="erp-modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1.2rem' }}>
               <button className="erp-btn erp-btn-outline" onClick={() => setShowNewOrderModal(false)}>Cancel</button>
-              <button className="erp-btn erp-btn-primary" onClick={async () => {
-                const newId = `WO-${1000 + Math.floor(Math.random() * 9000)}`;
-                try {
-                  await api.create('workOrder', { workOrderId: newId, quantity: 5000, status: 'Pending' });
-                } catch (e) {
-                  console.error(e);
-                }
-                
-                setStats((prev: any) => ({
-                  ...prev,
-                  activeWorkOrders: prev.activeWorkOrders + 1,
-                  workOrders: [{ workOrderId: newId, status: 'Pending' }, ...prev.workOrders],
-                  dynamicActivities: [
-                    { 
-                      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }), 
-                      title: `Work Order ${newId} created`, 
-                      by: `By ${user?.firstName || 'Rahul'} (${role})`, 
-                      tag: 'production' 
-                    },
-                    ...(prev.dynamicActivities || [])
-                  ]
-                }));
-                alert(`Work Order ${newId} created successfully! (Demo)`);
+              <button className="erp-btn erp-btn-primary" onClick={() => {
+                alert('New Work Order Created Successfully! (Demo)');
                 setShowNewOrderModal(false);
               }}>Create Work Order</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== COMMODITY LIVE PRICE DETAIL MODAL ===== */}
+      {selectedCommodity && (
+        <div
+          className="erp-modal-overlay"
+          onClick={() => setSelectedCommodity(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}
+        >
+          <div
+            className="erp-modal-card"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: '#ffffff',
+              borderRadius: '16px',
+              padding: '1.5rem 1.8rem',
+              maxWidth: '480px',
+              width: '90%',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.2)',
+              border: '1px solid #e2e8f0',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.2rem'
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', border: '1px solid #cbd5e1' }}>
+                  {selectedCommodity.icon}
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>{selectedCommodity.name}</h3>
+                  <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>{selectedCommodity.indexName}</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedCommodity(null)}
+                style={{ background: '#f1f5f9', border: 'none', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', fontSize: '1rem', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Live Price Big Card */}
+            <div style={{ background: selectedCommodity.isPositive ? '#f0fdf4' : '#fef2f2', border: `1px solid ${selectedCommodity.isPositive ? '#bbf7d0' : '#fecaca'}`, borderRadius: '12px', padding: '1rem 1.2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', fontWeight: 700 }}>LIVE SPOT PRICE</span>
+                <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#0f172a', lineHeight: 1.1 }}>{selectedCommodity.price}</div>
+                <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>{selectedCommodity.unit}</span>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <span style={{ fontSize: '1.05rem', fontWeight: 800, color: selectedCommodity.isPositive ? '#16a34a' : '#dc2626' }}>
+                  {selectedCommodity.change} ({selectedCommodity.percent})
+                </span>
+                <div style={{ fontSize: '0.75rem', color: selectedCommodity.isPositive ? '#15803d' : '#991b1b', fontWeight: 600, marginTop: '2px' }}>
+                  {selectedCommodity.isPositive ? '▲ Trading Up Today' : '▼ Trading Down Today'}
+                </div>
+              </div>
+            </div>
+
+            {/* Market High / Low Metrics */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.8rem', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>24H HIGH</span>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#15803d', marginTop: '2px' }}>{selectedCommodity.high}</div>
+              </div>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '0.8rem', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>24H LOW</span>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#b91c1c', marginTop: '2px' }}>{selectedCommodity.low}</div>
+              </div>
+            </div>
+
+            {/* Quick Action Button */}
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.2rem' }}>
+              <button
+                className="erp-btn erp-btn-outline"
+                style={{ flex: 1, justifyContent: 'center' }}
+                onClick={() => setSelectedCommodity(null)}
+              >
+                Close
+              </button>
+              <button
+                className="erp-btn erp-btn-primary"
+                style={{ flex: 1, justifyContent: 'center' }}
+                onClick={() => {
+                  alert(`Created Purchase Order for ${selectedCommodity.name} at live market price ${selectedCommodity.price} ${selectedCommodity.unit}! (Demo)`);
+                  setSelectedCommodity(null);
+                  navigate('/purchase-orders');
+                }}
+              >
+                + Procurement PO
+              </button>
+            </div>
+
           </div>
         </div>
       )}

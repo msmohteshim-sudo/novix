@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Scene {
@@ -9,56 +9,36 @@ interface Scene {
 
 const SCENES: Scene[] = [
   {
-    id: 'sugarcane-mill',
-    url: '/images/sugarcane-mill.jpg',
-    alt: 'Sugarcane processing mill and raw juice extraction plant'
+    id: 'textile-spinning-tco12',
+    url: '/images/slide-1-spinning.jpg',
+    alt: 'Trützschler Spinning TCO 12 - High tech yarn spinning line'
   },
   {
-    id: 'warehouse-logistics',
-    url: '/images/warehouse-logistics.jpg',
-    alt: 'Industrial warehouse, racking storage and forklift logistics'
+    id: 'weaving-department-loom16',
+    url: '/images/slide-2-weaving.jpg',
+    alt: 'Weaving Department - Automated loom machinery floor'
   },
   {
-    id: 'food-processing',
-    url: '/images/food-processing.jpg',
-    alt: 'Food processing, washing, and packaging production line'
+    id: 'dyeing-range-winch02',
+    url: '/images/slide-3-dyeing.jpg',
+    alt: 'Industrial Dyeing Range Winch-02 fabric processing plant'
   },
   {
-    id: 'auto-assembly',
-    url: '/images/auto-assembly.jpg',
-    alt: 'Automotive vehicle assembly line with robotic welding'
+    id: 'fabric-inspection-machine',
+    url: '/images/slide-4-inspection.jpg',
+    alt: 'Fabric Inspection Machine - Quality control department'
   },
   {
-    id: 'steel-mill',
-    url: '/images/steel-mill.jpg',
-    alt: 'Heavy steel manufacturing mill and hot rolling bar line'
+    id: 'finished-goods-warehouse',
+    url: '/images/slide-5-warehouse.jpg',
+    alt: 'Finished Goods Warehouse - Barcode scanning, packaging & logistics'
   },
   {
-    id: 'footwear-factory',
-    url: '/images/footwear-factory.jpg',
-    alt: 'Footwear and shoe manufacturing conveyor assembly line'
-  },
-  {
-    id: 'poultry-farm',
-    url: '/images/poultry-farm.jpg',
-    alt: 'Modern commercial poultry farm layer area and egg collection'
-  },
-  {
-    id: 'textile-spinning',
-    url: '/images/textile-spinning.jpg',
-    alt: 'Textile yarn bobbin spinning and weaving mill'
+    id: 'circular-knitting-department',
+    url: '/images/slide-6-knitting.jpg',
+    alt: 'Circular Knitting Department - High output yarn knitting machinery floor'
   }
 ];
-
-/** Fisher-Yates shuffle — randomize order each session */
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
 
 interface Props {
   intervalMs?: number;
@@ -66,7 +46,7 @@ interface Props {
 }
 
 export const RotatingIndustryBackground: React.FC<Props> = ({ intervalMs = 5000, showControls = true }) => {
-  const scenes = useMemo(() => shuffle(SCENES), []);
+  const scenes = SCENES;
   const [current, setCurrent] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
